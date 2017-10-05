@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	////Change this to your name and email
-	//m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Brandon M. Rodriguez - bmr1334@rit.edu";
 
 	////Alberto needed this at this position for software recording.
 	//m_pWindow->setPosition(sf::Vector2i(710, 0));
@@ -57,16 +57,20 @@ void Application::Display(void)
 	//calculate the current position
 	vector3 v3CurrentPos;
 	
-
-
-
-
 	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
-	//-------------------
+	//where we are in the path
+	static uint segment = 0;
+
+	//calculate current model position
+	float fPercentage = MapValue(fTimer, 0.0f, 2.0f, 0.0f, 1.0f); //calculates percentage from 0-1 based on time
+	v3CurrentPos = glm::lerp(m_stopsList[segment], m_stopsList[(segment + 1) % m_stopsList.size()], fPercentage); //move from last segment to next segment 
 	
-
-
+	//have we finished the current segment?
+	if (fPercentage >= 1.0f) {
+		segment++;
+		fTimer = m_pSystem->GetDeltaTime(uClock);
+		segment %= m_stopsList.size(); //make sure we stay in bounds
+	}
 	
 	matrix4 m4Model = glm::translate(v3CurrentPos);
 	m_pModel->SetModelMatrix(m4Model);
