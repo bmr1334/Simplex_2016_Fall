@@ -276,9 +276,33 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
 	// -------------------------------
 
+	//variables
+	vector3 top(0.0f, a_fHeight, 0.0f);
+	vector3 bottom(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> ring;
+
+	//loops around bottom ring to find positions of vertices
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
+		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
+		float pointY = 0.0f;
+		ring.push_back(vector3(pointX, pointY, pointZ));
+	}
+	
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		//at last spot, must loop around since at ring size cap
+		if (i == ring.size() - 1) {
+			AddTri(ring[0], ring[i], top);
+			AddTri(bottom, ring[i], ring[0]);
+		}
+		else {
+			AddTri(ring[i + 1], ring[i], top);
+			AddTri(bottom, ring[i], ring[i + 1]);
+		}
+	}
+	
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -300,8 +324,36 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
 	// -------------------------------
+
+	//variables
+	vector3 top(0.0f, a_fHeight, 0.0f);
+	vector3 bottom(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> ringBottom;
+	std::vector<vector3> ringTop;
+
+	//loops around both rings to find positions of vertices
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
+		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
+		float pointY = 0.0f;
+		ringBottom.push_back(vector3(pointX, pointY, pointZ));
+		ringTop.push_back(vector3(pointX, a_fHeight, pointZ));
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		//at last spot, must loop around since at ring size cap
+		if (i == ringBottom.size() - 1) {
+			AddTri(ringTop[0], ringTop[i], top);
+			AddTri(bottom, ringBottom[i], ringBottom[0]);
+			AddQuad(ringBottom[0], ringBottom[i], ringTop[0], ringTop[i]);
+		}
+		else {
+			AddTri(ringTop[i + 1], ringTop[i], top);
+			AddTri(bottom, ringBottom[i], ringBottom[i + 1]);
+			AddQuad(ringBottom[i + 1], ringBottom[i], ringTop[i + 1], ringTop[i]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -330,8 +382,49 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
 	// -------------------------------
+	//variables
+	vector3 top(0.0f, a_fHeight, 0.0f);
+	vector3 bottom(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> ringOuterBottom;
+	std::vector<vector3> ringInnerBottom;
+	std::vector<vector3> ringOuterTop;
+	std::vector<vector3> ringInnerTop;
+
+	//loops around both rings to find positions of vertices
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float pointX = a_fOuterRadius * cos((i * (2 * PI)) / a_nSubdivisions);
+		float pointInnerX = a_fInnerRadius * cos((i * (2 * PI)) / a_nSubdivisions);
+		float pointInnerZ = a_fInnerRadius * sin((i * (2 * PI)) / a_nSubdivisions);
+		float pointZ = a_fOuterRadius * sin((i * (2 * PI)) / a_nSubdivisions);
+		float pointY = 0.0f;
+		ringOuterBottom.push_back(vector3(pointX, pointY, pointZ));
+		ringOuterTop.push_back(vector3(pointX, a_fHeight, pointZ));
+		ringInnerBottom.push_back(vector3(pointInnerX, pointY, pointInnerZ));
+		ringInnerTop.push_back(vector3(pointInnerX, a_fHeight, pointInnerZ));
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		//at last spot, must loop around since at ring size cap
+		if (i == ringOuterBottom.size() - 1) {
+			//top and bottom
+			AddQuad(ringOuterTop[0], ringOuterTop[i], ringInnerTop[0], ringInnerTop[i]);
+			AddQuad(ringInnerBottom[0], ringInnerBottom[i], ringOuterBottom[0], ringOuterBottom[i]);
+
+			//sides
+			AddQuad(ringOuterBottom[0], ringOuterBottom[i], ringOuterTop[0], ringOuterTop[i]);
+			AddQuad(ringInnerTop[0], ringInnerTop[i], ringInnerBottom[0], ringInnerBottom[i]);
+		}
+		else {
+			//top and bottom
+			AddQuad(ringOuterTop[i + 1], ringOuterTop[i], ringInnerTop[i + 1], ringInnerTop[i]);
+			AddQuad(ringInnerBottom[i + 1], ringInnerBottom[i], ringOuterBottom[i + 1], ringOuterBottom[i]);
+
+			//sides
+			AddQuad(ringOuterBottom[i + 1], ringOuterBottom[i], ringOuterTop[i + 1], ringOuterTop[i]);
+			AddQuad(ringInnerTop[i + 1], ringInnerTop[i], ringInnerBottom[i + 1], ringInnerBottom[i]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -375,10 +468,9 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		a_fRadius = 0.01f;
 
 	//Sets minimum and maximum of subdivisions
-	if (a_nSubdivisions < 1)
+	if (a_nSubdivisions < 3)
 	{
-		GenerateCube(a_fRadius * 2.0f, a_v3Color);
-		return;
+		a_nSubdivisions = 3;
 	}
 	if (a_nSubdivisions > 6)
 		a_nSubdivisions = 6;
@@ -387,8 +479,55 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
 	// -------------------------------
+
+	//variables
+	vector3 top(0.0f, a_fRadius, 0.0f);
+	vector3 bottom(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> ringBottom;
+	std::vector<vector3> ringTop;
+	std::vector<vector3> ringOne;
+	std::vector<vector3> ringTwo;
+	std::vector<vector3> ringThree;
+
+	//loops around both rings to find positions of vertices
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
+		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
+		float pointY = 0.0f;
+		
+		ringTop.push_back(vector3(pointX * a_fRadius, a_fRadius, pointZ * a_fRadius));
+		ringOne.push_back(vector3(pointX * a_fRadius * 1.5, (3 * a_fRadius) / 4, pointZ * a_fRadius * 1.5)); //3/4 of the way to the top
+		ringTwo.push_back(vector3(pointX * a_fRadius * 1.6, a_fRadius / 2, pointZ * a_fRadius * 1.6)); //halfway
+		ringThree.push_back(vector3(pointX * a_fRadius * 1.5, a_fRadius / 4, pointZ * a_fRadius * 1.5)); //quarter of the way
+		ringBottom.push_back(vector3(pointX * a_fRadius, pointY, pointZ * a_fRadius));
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		//at last spot, must loop around since at ring size cap
+		if (i == ringBottom.size() - 1) {
+			AddTri(ringTop[0], ringTop[i], top);
+			AddTri(bottom, ringBottom[i], ringBottom[0]);
+
+			//side faces, from top to bottom
+			AddQuad(ringOne[0], ringOne[i], ringTop[0], ringTop[i]);
+			AddQuad(ringTwo[0], ringTwo[i], ringOne[0], ringOne[i]);
+			AddQuad(ringThree[0], ringThree[i], ringTwo[0], ringTwo[i]);
+			AddQuad(ringBottom[0], ringBottom[i], ringThree[0], ringThree[i]);
+			//AddQuad(ringBottom[0], ringBottom[i], ringTop[0], ringTop[i]);
+		}
+		else {
+			AddTri(ringTop[i + 1], ringTop[i], top);
+			AddTri(bottom, ringBottom[i], ringBottom[i + 1]);
+
+			//side faces, from top to bottom
+			AddQuad(ringOne[i + 1], ringOne[i], ringTop[i + 1], ringTop[i]);
+			AddQuad(ringTwo[i + 1], ringTwo[i], ringOne[i + 1], ringOne[i]);
+			AddQuad(ringThree[i + 1], ringThree[i], ringTwo[i + 1], ringTwo[i]);
+			AddQuad(ringBottom[i + 1], ringBottom[i], ringThree[i + 1], ringThree[i]);
+			//AddQuad(ringBottom[i + 1], ringBottom[i], ringTop[i + 1], ringTop[i]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
