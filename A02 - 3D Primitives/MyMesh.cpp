@@ -267,7 +267,7 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	if (a_fHeight < 0.01f)
 		a_fHeight = 0.01f;
 
-	if (a_nSubdivisions < 3)
+	if (a_nSubdivisions < 3) //less than 3 would be a plane!
 		a_nSubdivisions = 3;
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
@@ -279,27 +279,29 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	// -------------------------------
 
 	//variables
-	vector3 top(0.0f, a_fHeight, 0.0f);
-	vector3 bottom(0.0f, 0.0f, 0.0f);
-	std::vector<vector3> ring;
+	vector3 topVert(0.0f, a_fHeight, 0.0f);
+	vector3 bottomCenter(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> bottomCircle;
+	float x, z;
 
 	//loops around bottom ring to find positions of vertices
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
-		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
-		float pointY = 0.0f;
-		ring.push_back(vector3(pointX, pointY, pointZ));
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		x = a_fRadius * cos(((PI * 2) * i) / a_nSubdivisions);
+		z = a_fRadius * sin(((PI * 2) * i) / a_nSubdivisions);
+
+		//fill circle with vertex values
+		bottomCircle.push_back(vector3(x, 0.0f, z));
 	}
 	
-	for (int i = 0; i < a_nSubdivisions; i++) {
+	for (int i = 0; a_nSubdivisions > i; i++) {
 		//at last spot, must loop around since at ring size cap
-		if (i == ring.size() - 1) {
-			AddTri(ring[0], ring[i], top);
-			AddTri(bottom, ring[i], ring[0]);
+		if (bottomCircle.size() - 1 == i) { //connect sides then bottom
+			AddTri(bottomCircle[0], bottomCircle[i], topVert);
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[0]);
 		}
-		else {
-			AddTri(ring[i + 1], ring[i], top);
-			AddTri(bottom, ring[i], ring[i + 1]);
+		else { //connect sides then bottom
+			AddTri(bottomCircle[i + 1], bottomCircle[i], topVert);
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[i + 1]);
 		}
 	}
 	
@@ -315,7 +317,7 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	if (a_fHeight < 0.01f)
 		a_fHeight = 0.01f;
 
-	if (a_nSubdivisions < 3)
+	if (a_nSubdivisions < 3) //less than 3 would be a plane!
 		a_nSubdivisions = 3;
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
@@ -327,31 +329,33 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	// -------------------------------
 
 	//variables
-	vector3 top(0.0f, a_fHeight, 0.0f);
-	vector3 bottom(0.0f, 0.0f, 0.0f);
-	std::vector<vector3> ringBottom;
-	std::vector<vector3> ringTop;
+	vector3 topCenter(0.0f, a_fHeight, 0.0f);
+	vector3 bottomCenter(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> bottomCircle;
+	std::vector<vector3> topCircle;
+	float x, z;
 
-	//loops around both rings to find positions of vertices
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
-		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
-		float pointY = 0.0f;
-		ringBottom.push_back(vector3(pointX, pointY, pointZ));
-		ringTop.push_back(vector3(pointX, a_fHeight, pointZ));
+	//loops around both circles to find positions of vertices
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		x = a_fRadius * cos(((PI * 2) * i) / a_nSubdivisions);
+		z = a_fRadius * sin(((PI * 2) * i) / a_nSubdivisions);
+		
+		//populate circles with vertex values
+		topCircle.push_back(vector3(x, a_fHeight, z));
+		bottomCircle.push_back(vector3(x, 0.0f, z));
 	}
 
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		//at last spot, must loop around since at ring size cap
-		if (i == ringBottom.size() - 1) {
-			AddTri(ringTop[0], ringTop[i], top);
-			AddTri(bottom, ringBottom[i], ringBottom[0]);
-			AddQuad(ringBottom[0], ringBottom[i], ringTop[0], ringTop[i]);
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		//at last spot, must loop around since at circle size cap
+		if (bottomCircle.size() - 1 == i) { //connect from top to bottom
+			AddTri(topCircle[0], topCircle[i], topCenter);
+			AddQuad(bottomCircle[0], bottomCircle[i], topCircle[0], topCircle[i]);
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[0]);
 		}
-		else {
-			AddTri(ringTop[i + 1], ringTop[i], top);
-			AddTri(bottom, ringBottom[i], ringBottom[i + 1]);
-			AddQuad(ringBottom[i + 1], ringBottom[i], ringTop[i + 1], ringTop[i]);
+		else { //connect from top to bottom
+			AddTri(topCircle[i + 1], topCircle[i], topCenter);
+			AddQuad(bottomCircle[i + 1], bottomCircle[i], topCircle[i + 1], topCircle[i]);
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[i + 1]);
 		}
 	}
 
@@ -373,7 +377,7 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	if (a_fHeight < 0.01f)
 		a_fHeight = 0.01f;
 
-	if (a_nSubdivisions < 3)
+	if (a_nSubdivisions < 3) //less than 3 would be a plane!
 		a_nSubdivisions = 3;
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
@@ -383,46 +387,52 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 
 	// Replace this with your code
 	// -------------------------------
-	//variables
-	vector3 top(0.0f, a_fHeight, 0.0f);
-	vector3 bottom(0.0f, 0.0f, 0.0f);
-	std::vector<vector3> ringOuterBottom;
-	std::vector<vector3> ringInnerBottom;
-	std::vector<vector3> ringOuterTop;
-	std::vector<vector3> ringInnerTop;
 
-	//loops around both rings to find positions of vertices
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		float pointX = a_fOuterRadius * cos((i * (2 * PI)) / a_nSubdivisions);
-		float pointInnerX = a_fInnerRadius * cos((i * (2 * PI)) / a_nSubdivisions);
-		float pointInnerZ = a_fInnerRadius * sin((i * (2 * PI)) / a_nSubdivisions);
-		float pointZ = a_fOuterRadius * sin((i * (2 * PI)) / a_nSubdivisions);
-		float pointY = 0.0f;
-		ringOuterBottom.push_back(vector3(pointX, pointY, pointZ));
-		ringOuterTop.push_back(vector3(pointX, a_fHeight, pointZ));
-		ringInnerBottom.push_back(vector3(pointInnerX, pointY, pointInnerZ));
-		ringInnerTop.push_back(vector3(pointInnerX, a_fHeight, pointInnerZ));
+	//variables
+	std::vector<vector3> outerBottomCircle;
+	std::vector<vector3> innerBottomCircle;
+	std::vector<vector3> outerTopCircle;
+	std::vector<vector3> innerTopCircle;
+	float x, z, innerX, innerZ;
+	float y = 0.0f;
+
+	//loops around all four circles to find positions of vertices
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		x = a_fOuterRadius * cos(((PI * 2) * i) / a_nSubdivisions);
+		z = a_fOuterRadius * sin(((PI * 2) * i) / a_nSubdivisions);
+		innerX = a_fInnerRadius * cos(((PI * 2) * i) / a_nSubdivisions);
+		innerZ = a_fInnerRadius * sin(((PI * 2) * i) / a_nSubdivisions);
+
+		//fill appropriate circles with vertex values
+		outerBottomCircle.push_back(vector3(x, y, z));
+		outerTopCircle.push_back(vector3(x, a_fHeight, z));
+		innerBottomCircle.push_back(vector3(innerX, y, innerZ));
+		innerTopCircle.push_back(vector3(innerX, a_fHeight, innerZ));
 	}
 
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		//at last spot, must loop around since at ring size cap
-		if (i == ringOuterBottom.size() - 1) {
-			//top and bottom
-			AddQuad(ringOuterTop[0], ringOuterTop[i], ringInnerTop[0], ringInnerTop[i]);
-			AddQuad(ringInnerBottom[0], ringInnerBottom[i], ringOuterBottom[0], ringOuterBottom[i]);
+	//draw circles, looping through same way as before
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		if (outerBottomCircle.size() - 1 == i) { //at last spot, must loop around since at circle size cap
+			//top
+			AddQuad(outerTopCircle[0], outerTopCircle[i], innerTopCircle[0], innerTopCircle[i]);
 
 			//sides
-			AddQuad(ringOuterBottom[0], ringOuterBottom[i], ringOuterTop[0], ringOuterTop[i]);
-			AddQuad(ringInnerTop[0], ringInnerTop[i], ringInnerBottom[0], ringInnerBottom[i]);
+			AddQuad(outerBottomCircle[0], outerBottomCircle[i], outerTopCircle[0], outerTopCircle[i]);
+			AddQuad(innerTopCircle[0], innerTopCircle[i], innerBottomCircle[0], innerBottomCircle[i]);
+
+			//and bottom
+			AddQuad(innerBottomCircle[0], innerBottomCircle[i], outerBottomCircle[0], outerBottomCircle[i]);
 		}
-		else {
-			//top and bottom
-			AddQuad(ringOuterTop[i + 1], ringOuterTop[i], ringInnerTop[i + 1], ringInnerTop[i]);
-			AddQuad(ringInnerBottom[i + 1], ringInnerBottom[i], ringOuterBottom[i + 1], ringOuterBottom[i]);
+		else { //not at last spot
+			//top
+			AddQuad(outerTopCircle[i + 1], outerTopCircle[i], innerTopCircle[i + 1], innerTopCircle[i]);
 
 			//sides
-			AddQuad(ringOuterBottom[i + 1], ringOuterBottom[i], ringOuterTop[i + 1], ringOuterTop[i]);
-			AddQuad(ringInnerTop[i + 1], ringInnerTop[i], ringInnerBottom[i + 1], ringInnerBottom[i]);
+			AddQuad(outerBottomCircle[i + 1], outerBottomCircle[i], outerTopCircle[i + 1], outerTopCircle[i]);
+			AddQuad(innerTopCircle[i + 1], innerTopCircle[i], innerBottomCircle[i + 1], innerBottomCircle[i]);
+
+			//and bottom
+			AddQuad(innerBottomCircle[i + 1], innerBottomCircle[i], outerBottomCircle[i + 1], outerBottomCircle[i]);
 		}
 	}
 
@@ -468,12 +478,12 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		a_fRadius = 0.01f;
 
 	//Sets minimum and maximum of subdivisions
-	if (a_nSubdivisions < 3)
+	if (a_nSubdivisions < 3) //less than 3 would be a plane!
 	{
 		a_nSubdivisions = 3;
 	}
-	if (a_nSubdivisions > 6)
-		a_nSubdivisions = 6;
+	if (a_nSubdivisions > 360)
+		a_nSubdivisions = 360;
 
 	Release();
 	Init();
@@ -482,50 +492,55 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	// -------------------------------
 
 	//variables
-	vector3 top(0.0f, a_fRadius, 0.0f);
-	vector3 bottom(0.0f, 0.0f, 0.0f);
-	std::vector<vector3> ringBottom;
-	std::vector<vector3> ringTop;
-	std::vector<vector3> ringOne;
-	std::vector<vector3> ringTwo;
-	std::vector<vector3> ringThree;
+	vector3 topCenter(0.0f, a_fRadius, 0.0f);
+	vector3 bottomCenter(0.0f, 0.0f, 0.0f);
+	std::vector<vector3> bottomCircle;
+	std::vector<vector3> topCircle;
+	std::vector<vector3> circleOne;
+	std::vector<vector3> circleTwo;
+	std::vector<vector3> circleThree;
+	float x, z;
 
-	//loops around both rings to find positions of vertices
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		float pointX = a_fRadius * cos((i * (2 * PI)) / a_nSubdivisions);
-		float pointZ = a_fRadius * sin((i * (2 * PI)) / a_nSubdivisions);
-		float pointY = 0.0f;
+	//loops around all circles to find positions of vertices
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		x = a_fRadius * cos((i * (PI * 2)) / a_nSubdivisions);
+		z = a_fRadius * sin((i * (PI * 2)) / a_nSubdivisions);
 		
-		ringTop.push_back(vector3(pointX * a_fRadius, a_fRadius, pointZ * a_fRadius));
-		ringOne.push_back(vector3(pointX * a_fRadius * 1.5, (3 * a_fRadius) / 4, pointZ * a_fRadius * 1.5)); //3/4 of the way to the top
-		ringTwo.push_back(vector3(pointX * a_fRadius * 1.6, a_fRadius / 2, pointZ * a_fRadius * 1.6)); //halfway
-		ringThree.push_back(vector3(pointX * a_fRadius * 1.5, a_fRadius / 4, pointZ * a_fRadius * 1.5)); //quarter of the way
-		ringBottom.push_back(vector3(pointX * a_fRadius, pointY, pointZ * a_fRadius));
+		//fill circles with appropriate vertex values
+		topCircle.push_back(vector3(x * a_fRadius, a_fRadius, z * a_fRadius));
+		circleOne.push_back(vector3(x * a_fRadius * 1.5, (3 * a_fRadius) / 4, z * a_fRadius * 1.5)); //3/4 of the way to the top
+		circleTwo.push_back(vector3(x * a_fRadius * 1.6, a_fRadius / 2, z * a_fRadius * 1.6)); //halfway
+		circleThree.push_back(vector3(x * a_fRadius * 1.5, a_fRadius / 4, z * a_fRadius * 1.5)); //quarter of the way
+		bottomCircle.push_back(vector3(x * a_fRadius, 0.0f, z * a_fRadius));
 	}
 
-	for (int i = 0; i < a_nSubdivisions; i++) {
-		//at last spot, must loop around since at ring size cap
-		if (i == ringBottom.size() - 1) {
-			AddTri(ringTop[0], ringTop[i], top);
-			AddTri(bottom, ringBottom[i], ringBottom[0]);
+	//draw circles, looping through same way as before
+	for (int i = 0; a_nSubdivisions > i; i++) {
+		if (bottomCircle.size() - 1 == i) { //at last spot, must loop around since at circle size cap
+			//top faces
+			AddTri(topCircle[0], topCircle[i], topCenter);
 
 			//side faces, from top to bottom
-			AddQuad(ringOne[0], ringOne[i], ringTop[0], ringTop[i]);
-			AddQuad(ringTwo[0], ringTwo[i], ringOne[0], ringOne[i]);
-			AddQuad(ringThree[0], ringThree[i], ringTwo[0], ringTwo[i]);
-			AddQuad(ringBottom[0], ringBottom[i], ringThree[0], ringThree[i]);
-			//AddQuad(ringBottom[0], ringBottom[i], ringTop[0], ringTop[i]);
+			AddQuad(circleOne[0], circleOne[i], topCircle[0], topCircle[i]);
+			AddQuad(circleTwo[0], circleTwo[i], circleOne[0], circleOne[i]);
+			AddQuad(circleThree[0], circleThree[i], circleTwo[0], circleTwo[i]);
+			AddQuad(bottomCircle[0], bottomCircle[i], circleThree[0], circleThree[i]);
+
+			//botom faces
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[0]);
 		}
-		else {
-			AddTri(ringTop[i + 1], ringTop[i], top);
-			AddTri(bottom, ringBottom[i], ringBottom[i + 1]);
+		else { //not at last spot
+			//top faces
+			AddTri(topCircle[i + 1], topCircle[i], topCenter);
 
 			//side faces, from top to bottom
-			AddQuad(ringOne[i + 1], ringOne[i], ringTop[i + 1], ringTop[i]);
-			AddQuad(ringTwo[i + 1], ringTwo[i], ringOne[i + 1], ringOne[i]);
-			AddQuad(ringThree[i + 1], ringThree[i], ringTwo[i + 1], ringTwo[i]);
-			AddQuad(ringBottom[i + 1], ringBottom[i], ringThree[i + 1], ringThree[i]);
-			//AddQuad(ringBottom[i + 1], ringBottom[i], ringTop[i + 1], ringTop[i]);
+			AddQuad(circleOne[i + 1], circleOne[i], topCircle[i + 1], topCircle[i]);
+			AddQuad(circleTwo[i + 1], circleTwo[i], circleOne[i + 1], circleOne[i]);
+			AddQuad(circleThree[i + 1], circleThree[i], circleTwo[i + 1], circleTwo[i]);
+			AddQuad(bottomCircle[i + 1], bottomCircle[i], circleThree[i + 1], circleThree[i]);
+
+			//and bottom faces
+			AddTri(bottomCenter, bottomCircle[i], bottomCircle[i + 1]);
 		}
 	}
 
