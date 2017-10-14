@@ -18,7 +18,7 @@ Date: 2017/05
 
 class Application
 {
-	uint m_uOrbits = 0; //number of shapes starting at 3 and increasing in sides
+	uint m_uOrbits = 7; //number of shapes starting at 3 and increasing in sides
 	std::vector<uint> m_shapeList; //shape index for circles
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 	
@@ -46,6 +46,13 @@ private:
 	uint m_uActCont = 0; //Active Controller of the Application
 
 public:
+	//A03 variables
+	std::vector<float> startPosX; //calculates starting x position of spheres
+	std::vector<std::vector<vector3>> orbitsVector[7]; //vector that holds all orbits, orbits are vectors that hold all vertex positions as vector3's 
+	
+	
+
+
 #pragma region Constructor / Run / Destructor
 	/*
 	USAGE: Constructor

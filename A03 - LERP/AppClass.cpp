@@ -26,6 +26,12 @@ void Application::InitVariables(void)
 		m_uOrbits = 7;
 
 	float fSize = 1.0f; //initial size of orbits
+	/*for (int i = 0; i < 7; i++) {
+		
+		for (int i = 0; i < 7; i++) {
+			orbitsVector[i][i] = vector3(0.0f,0.0f,0.0f);
+		}
+	}*/
 
 	//creating a color using the spectrum 
 	uint uColor = 650; //650 is Red
@@ -39,8 +45,11 @@ void Application::InitVariables(void)
 	{
 		vector3 v3Color = WaveLengthToRGB(uColor); //calculate color based on wavelength
 		m_shapeList.push_back(m_pMeshMngr->GenerateTorus(fSize, fSize - 0.1f, 3, i, v3Color)); //generate a custom torus and add it to the meshmanager
+		startPosX.push_back(fSize);
+		orbitsVector[i][0].push_back(vector3(fSize, 0, 0));
 		fSize += 0.5f; //increment the size for the next orbit
 		uColor -= static_cast<uint>(decrements); //decrease the wavelength
+		
 	}
 }
 void Application::Update(void)
@@ -73,7 +82,7 @@ void Application::Display(void)
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 90.0f, AXIS_X));
 
 		//calculate the current position
-		vector3 v3CurrentPos = ZERO_V3;
+		vector3 v3CurrentPos = orbitsVector[i][0];                                                   //-----------------------------------------change sphere point here
 		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
 
 		//draw spheres
