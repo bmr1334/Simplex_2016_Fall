@@ -38,7 +38,7 @@ void Application::Update(void)
 
 	//Is the first person camera active?
 	CameraRotation();
-	
+
 	//Attach the model matrix that takes me from the world coordinate system
 	//m_pModel->SetModelMatrix(m_mModel);
 
@@ -49,7 +49,7 @@ void Application::Display(void)
 {
 	//Clear the screen
 	ClearScreen();
-	
+
 	//draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
 
@@ -61,17 +61,23 @@ void Application::Display(void)
 	//draw the primitive
 	//m_pMesh->Render(m_pCamera->GetProjectionMatrix(), m_pCamera->GetViewMatrix(), ToMatrix4(m_qArcBall));
 	//m_pMesh->Render(m_pCamera, ToMatrix4(m_qArcBall));
-	m_pMesh2->Render(m_pCamera, glm::translate(vector3(0.0f, 0.0f, -5.0f)));
+	vector3 v3View = m_v3Pos;
+	v3View.z -= 1.0f;
+	matrix4 m4View = glm::lookAt(vector3(0, 0, 10) + m_v3Pos, v3View, vector3(0, 1, 0));
+	//matrix4 m4Projetion = glm::perspective(45.0f, m_pSystem->GetWindowRatio(), 0.01f, 1000.0f);
+	matrix4 m4Projetion = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.01f, 1000.0f);
+	matrix4 m4model = ToMatrix4(m_qArcBall);
+	m_pMesh2->Render(m4Projetion, m4View, m4model);
 
 	//render list call
 	m_uRenderCallCount = m_pMeshMngr->Render();
 
 	//clear the render list
 	m_pMeshMngr->ClearRenderList();
-	
+
 	//draw gui
 	DrawGUI();
-	
+
 	//end the current frame (internally swaps the front and back buffers)
 	m_pWindow->display();
 }
@@ -88,7 +94,7 @@ void Application::Release(void)
 
 	//release the camera
 	SafeDelete(m_pCamera);
-	
+
 	//release GUI
 	ShutdownGUI();
 }

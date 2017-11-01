@@ -21,10 +21,10 @@ class Application
 	uint m_uOrbits = 7; //number of shapes starting at 3 and increasing in sides
 	std::vector<uint> m_shapeList; //shape index for circles
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
-	
+
 private:
 	static ImGuiObject gui; //GUI object
-	
+
 	uint m_uRenderCallCount = 0; //count of render calls per frame
 	uint m_uControllerCount = 0; //count of controllers connected
 
@@ -32,7 +32,7 @@ private:
 	bool m_bFPC = false;// First Person Camera flag
 	bool m_bArcBall = false;// Arcball flag
 	quaternion m_qArcBall; //ArcBall quaternion
-	
+
 	vector3 m_v3Light; //position of light 1
 	vector4 m_v4ClearColor; //Color of the scene
 	bool m_bRunning = false; //Is app running?
@@ -48,37 +48,34 @@ private:
 public:
 	//A03 variables
 	std::vector<float> startPosX; //calculates starting x position of spheres
-	std::vector<std::vector<vector3>> orbitsVector[7]; //vector that holds all orbits, orbits are vectors that hold all vertex positions as vector3's 
-	
-	
-
+	std::vector<std::vector<vector3>> orbitsVector; //vector that holds all orbits, orbits are vectors that hold all vertex positions as vector3's 
 
 #pragma region Constructor / Run / Destructor
-	/*
-	USAGE: Constructor
-	ARGUMENTS: ---
-	OUTPUT: ---
-	*/
+													/*
+													USAGE: Constructor
+													ARGUMENTS: ---
+													OUTPUT: ---
+													*/
 	Application();
 	/*
 	USAGE: Initializes the window and rendering context
-	ARGUMENTS: 
-		String a_sApplicationName -> Name of the window if blank will use project Name
-		int size -> formated size, relate to BTO_RESOLUTIONS
-		bool a_bFullscreen = false -> is the window fullscreen?
-		bool a_bBorderless = false -> is the window borderless?
+	ARGUMENTS:
+	String a_sApplicationName -> Name of the window if blank will use project Name
+	int size -> formated size, relate to BTO_RESOLUTIONS
+	bool a_bFullscreen = false -> is the window fullscreen?
+	bool a_bBorderless = false -> is the window borderless?
 	OUTPUT: ---
 	*/
-	void Init(String a_sApplicationName = "", int a_uSize = BTO_RESOLUTIONS::RES_C_1280x720_16x9_HD, 
+	void Init(String a_sApplicationName = "", int a_uSize = BTO_RESOLUTIONS::RES_C_1280x720_16x9_HD,
 		bool a_bFullscreen = false, bool a_bBorderless = false);
 	/*
 	USAGE: Initializes the window and rendering context
-	ARGUMENTS: 
-		String a_sApplicationName = "" -> Name of the window if blank will use project Name
-		uint a_nWidth -> Window Width
-		uint a_nHeight -> Window Height
-		bool a_bFullscreen -> is the window fullscreen?
-		bool a_bBorderless -> is the window borderless?
+	ARGUMENTS:
+	String a_sApplicationName = "" -> Name of the window if blank will use project Name
+	uint a_nWidth -> Window Width
+	uint a_nHeight -> Window Height
+	bool a_bFullscreen -> is the window fullscreen?
+	bool a_bBorderless -> is the window borderless?
 	OUTPUT: ---
 	*/
 	void Init(String a_sApplicationName, uint a_uWidth, uint a_uHeight, bool a_bFullscreen, bool a_bBorderless);
@@ -195,7 +192,7 @@ private:
 	*/
 	void CameraRotation(float a_fSpeed = 0.005f);
 #pragma endregion
-	
+
 #pragma region Process Events
 	/*
 	USAGE: Resizes the window
