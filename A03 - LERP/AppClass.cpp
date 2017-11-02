@@ -33,28 +33,30 @@ void Application::InitVariables(void)
 
 	//creating a color using the spectrum 
 	uint uColor = 650; //650 is Red
-					   //prevent division by 0
+	//prevent division by 0
 	float decrements = 250.0f / (m_uOrbits > 1 ? static_cast<float>(m_uOrbits - 1) : 1.0f); //decrement until you get to 400 (which is violet)
-																							/*
-																							This part will create the orbits, it start at 3 because that is the minimum subdivisions a torus can have
-																							*/
+	/*
+	This part will create the orbits, it start at 3 because that is the minimum subdivisions a torus can have
+	*/
 
 	uint uSides = 3; //start with the minimal 3 sides
-	float x, y;
+	float xPos, yPos; //x and y positions of the points on the orbits
 
+	//loop to calculate each point on each orbit
 	for (uint i = 0; i < m_uOrbits; i++) {
-		for (uint u = 0; u < m_uOrbits + uSides; u++) {
+		for (uint u = 0; u < i + uSides; u++) {
 
 			//calculate x and y positions of points
-			x = fSize * cos(((PI * 2) * u) / (uSides + i));
-			y = fSize * sin(((PI * 2) * u) / (uSides + i));
+			xPos = fSize * cos(((PI * 2) * u) / (uSides + i));
+			yPos = fSize * sin(((PI * 2) * u) / (uSides + i));
 
-			orbitsVector[i].push_back(vector3(x, y, 0));
-
+			//add current point values to orbitsVector
+			orbitsVector[i].push_back(vector3(xPos, yPos, 0));
 		}
-		fSize += 0.5f;
+		fSize += 0.5f; //move out another orbit
 	}
 
+	//reset fSize for next loop
 	fSize = 1.0f;
 
 	for (uint i = uSides; i < m_uOrbits + uSides; i++)
@@ -83,39 +85,39 @@ void Application::Display(void)
 
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix(); //view Matrix
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix(); //Projection Matrix
-																 //matrix4 m4Offset = IDENTITY_M4; //offset of the orbits, starts as the global coordinate system
-																 /*
-																 The following offset will orient the orbits as in the demo, start without it to make your life easier.
-																 */
+
+	/*
+	The following offset will orient the orbits as in the demo, start without it to make your life easier.
+	*/
+
 	matrix4 m4Offset = glm::rotate(IDENTITY_M4, 90.0f, AXIS_Z);
 
 	//get a timer
-	static float fTimer = 0;	//store the new timer
+	static float fTimer = 0; //store the new timer
 	static uint uClock = m_pSystem->GenClock(); //generate a new clock for that timer
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
-											   //calculate current model position
+	//calculate current model position
 	float fPercentage = MapValue(fTimer, 0.0f, 2.0f, 0.0f, 1.0f); //calculates percentage from 0-1 based on time
 
-																  // draw a shapes
-	static std::vector<uint> stops;
-
+	//populate stops vector with m_uOrbits values
+	static std::vector<uint> pointStops;
 	for (uint j = 0; j < m_uOrbits; j++) {
-		stops.push_back(0);
+		pointStops.push_back(0);
 	}
-	//stops;
 
+	//loop that lerps between different points on each orbit
 	for (uint i = 0; i < m_uOrbits; i++)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 90.0f, AXIS_X));
-		vector3 v3CurrentPos = glm::lerp(orbitsVector[i][stops[i]], orbitsVector[i][(stops[i] + 1) % orbitsVector[i].size()], fPercentage); //move from last segment to next segment 
+		vector3 v3CurrentPos = glm::lerp(orbitsVector[i][pointStops[i]], orbitsVector[i][(pointStops[i] + 1) % orbitsVector[i].size()], fPercentage); //move from last segment to next segment 
 		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
 
 		//have we finished the current segment?
 		if (fPercentage >= 1.0f) {
-			stops[i]++;
+			pointStops[i]++;
 			fTimer = m_pSystem->GetDeltaTime(uClock);
-			stops[i] %= orbitsVector[i].size(); //make sure we stay in bounds
+			pointStops[i] %= orbitsVector[i].size(); //make sure we stay in bounds
 		}
 
 		//draw spheres

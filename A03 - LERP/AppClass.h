@@ -47,15 +47,14 @@ private:
 
 public:
 	//A03 variables
-	std::vector<float> startPosX; //calculates starting x position of spheres
-	std::vector<std::vector<vector3>> orbitsVector; //vector that holds all orbits, orbits are vectors that hold all vertex positions as vector3's 
+	std::vector<std::vector<vector3>> orbitsVector; //vector that holds all orbits, orbits are vectors that hold all vertex positions as vector3s 
 
 #pragma region Constructor / Run / Destructor
-													/*
-													USAGE: Constructor
-													ARGUMENTS: ---
-													OUTPUT: ---
-													*/
+	/*
+	USAGE: Constructor
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
 	Application();
 	/*
 	USAGE: Initializes the window and rendering context
