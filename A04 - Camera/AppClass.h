@@ -16,6 +16,10 @@ namespace Simplex
 
 class Application
 {
+	vector3 m_v3Pos;
+	vector3 m_v3Orientation;
+	quaternion m_qQuaternion;
+
 	MyCamera* m_pCamera = nullptr; //Camera class
 	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Programmer

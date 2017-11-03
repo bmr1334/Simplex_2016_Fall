@@ -3,7 +3,7 @@ using namespace Simplex;
 void Application::InitVariables(void)
 {
 	////Change this to your name and email
-	//m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Brandon M. Rodriguez - bmr1334@rit.edu";
 
 	////Alberto needed this at this position for software recording.
 	//m_pWindow->setPosition(sf::Vector2i(710, 0));
@@ -50,6 +50,48 @@ void Application::Display(void)
 
 	//clear the render list
 	m_pMeshMngr->ClearRenderList();
+
+	//calculate camera movement
+	vector3 v3View = m_v3Pos;
+	v3View.z -= 1.0f; //look one unit in front of camera
+	
+	//set camera values
+	matrix4 m4View = m_pCameraMngr->GetViewMatrix(); //view Matrix
+	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix(); //Projection Matrix
+	m_pCamera->SetPosition(m_v3Pos);
+	//CameraRotation(1.0f);
+	
+	//matrix4 m4RotX = glm::rotate(IDENTITY_M4, m_v3Orientation.x, AXIS_X);
+	//matrix4 m4RotY = glm::rotate(IDENTITY_M4, m_v3Orientation.y, AXIS_Y);
+	//matrix4 m4RotZ = glm::rotate(IDENTITY_M4, m_v3Orientation.z, AXIS_Z);
+	//matrix4 m4Orientation = m4RotX * m4RotY * m4RotZ;
+
+	//matrix4 m4Model = m4Orientation;
+
+	
+
+	//m_pCamera = glm::lookAt(m_v3Pos, )
+	//m_pCamera->SetTarget(vector3(v3View.x, v3View.y, v3View.z));
+
+	//matrix4 m4Model = ToMatrix4(m_qQuaternion);
+
+	vector4 forward;
+	vector4 up;
+	forward = ToMatrix4(m_qQuaternion) * vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	up = ToMatrix4(m_qQuaternion) * vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	vector3 f = vector3(forward.x, forward.y, forward.z);
+	vector3 u = vector3(up.x, up.y, up.z);
+
+	vector4 lookAtMat = vector4(0.0f, 0.0f, 1.0f, 1.0f) * glm::lookAt(m_v3Pos, f, u);
+
+	//m_pCamera->SetTarget(vector3(lookAtMat.x, lookAtMat.y, lookAtMat.z));
+	
+	m_pCamera->SetTarget(vector3(v3View.x, v3View.y, v3View.z));
+
+	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
+	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
+
+
 
 	//Render the list of MyMeshManager
 	m_pMyMeshMngr->Render();
