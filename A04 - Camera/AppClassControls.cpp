@@ -351,27 +351,38 @@ void Application::CameraRotation(float a_fSpeed)
 	{
 		fDeltaMouse = static_cast<float>(CenterX - MouseX);
 		fAngleY += fDeltaMouse * a_fSpeed;
-		m_qQuaternion = m_qQuaternion * glm::angleAxis(-1.0f, AXIS_Y);
+		m_qQuaternionY = m_qQuaternionY * glm::angleAxis(fAngleY, AXIS_Y);
 	}
 	else if (MouseX > CenterX)
 	{
 		fDeltaMouse = static_cast<float>(MouseX - CenterX);
 		fAngleY -= fDeltaMouse * a_fSpeed;
-		m_qQuaternion = m_qQuaternion * glm::angleAxis(1.0f, AXIS_Y);
+		m_qQuaternionY = m_qQuaternionY * glm::angleAxis(fAngleY, AXIS_Y);
 	}
-
 	if (MouseY < CenterY)
 	{
 		fDeltaMouse = static_cast<float>(CenterY - MouseY);
 		fAngleX -= fDeltaMouse * a_fSpeed;
-		m_qQuaternion = m_qQuaternion * glm::angleAxis(-1.0f, AXIS_X);
+		if (currAngleX + fAngleX < 25) {
+			currAngleX += -fAngleX;
+			m_qQuaternionX = m_qQuaternionX * glm::angleAxis(fAngleX, AXIS_X);
+		}
 	}
 	else if (MouseY > CenterY)
 	{
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
-		m_qQuaternion = m_qQuaternion * glm::angleAxis(1.0f, AXIS_X);
+		if (currAngleX - fAngleX> -25) {
+			currAngleX += -fAngleX;
+			m_qQuaternionX = m_qQuaternionX * glm::angleAxis(fAngleX, AXIS_X);
+		}
 	}
+
+	//cap vertical rotation
+	std::cout << "\n" << currAngleX;
+	//if (currAngleX >= 85) fAngleX -= fAngleX;
+	//if (currAngleX <= 85) fAngleX += fAngleX;
+
 	//Change the Yaw and the Pitch of the camera
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
@@ -392,22 +403,22 @@ void Application::ProcessKeyboard(void)
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
 		//m_pCameraMngr->MoveForward(fSpeed);
-		m_v3Pos.z -= 0.1f;
+		m_v3Pos.z += 0.1f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
 		//m_pCameraMngr->MoveForward(-fSpeed);
-		m_v3Pos.z += 0.1f;
+		m_v3Pos.z -= 0.1f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
 		//m_pCameraMngr->MoveSideways(-fSpeed);
-		m_v3Pos.x -= 0.1f;
+		m_v3Pos.x += 0.1f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
 		//m_pCameraMngr->MoveSideways(fSpeed);
-		m_v3Pos.x += 0.1f;
+		m_v3Pos.x -= 0.1f;
 	}
 
 

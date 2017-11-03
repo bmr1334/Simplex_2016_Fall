@@ -18,7 +18,9 @@ class Application
 {
 	vector3 m_v3Pos;
 	vector3 m_v3Orientation;
-	quaternion m_qQuaternion;
+	quaternion m_qQuaternionY;
+	quaternion m_qQuaternionX;
+	float currAngleX = 0;
 
 	MyCamera* m_pCamera = nullptr; //Camera class
 	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager
