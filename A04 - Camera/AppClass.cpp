@@ -84,9 +84,26 @@ void Application::Display(void)
 
 	vector4 lookAtMat = vector4(0.0f, 0.0f, 1.0f, 1.0f) * glm::lookAt(m_v3Pos, f, u);
 
+	//reference code from online, not mine
+	//https://github.com/Formlabs/Eigen/blob/master/demos/opengl/camera.cpp
+	/*Vector3f Camera::direction(void) const
+	{
+		return -(orientation() * Vector3f::UnitZ());
+	}
+	Vector3f Camera::up(void) const
+	{
+		return orientation() * Vector3f::UnitY();
+	}
+	Vector3f Camera::right(void) const
+	{
+		return orientation() * Vector3f::UnitX();
+	}*/
+
+
 	//m_pCamera->SetTarget(vector3(lookAtMat.x, lookAtMat.y, lookAtMat.z));
+	m_pCamera->SetTarget(vector3(v3View.x, v3View.y - lookAtMat.y, v3View.z));
 	
-	m_pCamera->SetTarget(vector3(v3View.x, v3View.y, v3View.z));
+	//m_pCamera->SetTarget(vector3(v3View.x, v3View.y, v3View.z));
 
 	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
 	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
