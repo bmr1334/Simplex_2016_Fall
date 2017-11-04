@@ -16,11 +16,13 @@ namespace Simplex
 
 class Application
 {
-	vector3 m_v3Pos;
-	vector3 m_v3Orientation;
-	quaternion m_qQuaternionY;
-	quaternion m_qQuaternionX;
-	float currAngleX = 0;
+	//A03 variables
+	vector3 m_v3Pos; //current position of the camera
+	quaternion m_qQuaternionY; //y rotation quaternion
+	quaternion m_qQuaternionX; //x rotation quaternion
+	float m_currThetaX = 0; //current theta x of camera in relation to starting position
+	float m_currThetaY = 0; //current theta y of camera in relation to starting position
+	vector3 m_cameraMovement; //used to calculate how much camera moves each update
 
 	MyCamera* m_pCamera = nullptr; //Camera class
 	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager

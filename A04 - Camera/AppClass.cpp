@@ -14,7 +14,7 @@ void Application::InitVariables(void)
 
 	//init the camera
 	m_pCamera = new MyCamera();
-	m_v3Pos = vector3(0.0f, 0.0f, 0.0f);
+	m_v3Pos = vector3(0.0f, 1.0f, 0.0f);
 	m_pCamera->SetPositionTargetAndUp(
 			m_v3Pos, //Where my eyes are
 			vector3(0.0f, 3.0f, 19.0f), //where what I'm looking at is
@@ -49,63 +49,18 @@ void Application::Display(void)
 	//Clear the screen
 	ClearScreen();
 
-	
-
-	//calculate camera movement
-	vector3 v3View = m_v3Pos;
-	v3View.z -= 1.0f; //look one unit in front of camera
-	
-	//set camera values
-	matrix4 m4View = m_pCameraMngr->GetViewMatrix(); //view Matrix
-	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix(); //Projection Matrix
-	m_pCamera->SetPosition(m_v3Pos);
-	//CameraRotation(1.0f);
-	
-	//matrix4 m4RotX = glm::rotate(IDENTITY_M4, m_v3Orientation.x, AXIS_X);
-	//matrix4 m4RotY = glm::rotate(IDENTITY_M4, m_v3Orientation.y, AXIS_Y);
-	//matrix4 m4RotZ = glm::rotate(IDENTITY_M4, m_v3Orientation.z, AXIS_Z);
-	//matrix4 m4Orientation = m4RotX * m4RotY * m4RotZ;
-
-	//matrix4 m4Model = m4Orientation;
-
-	vector4 forward = ToMatrix4(m_qQuaternionY * m_qQuaternionX) * vector4(0.0f, 0.0f, 1.0f, 1.0f);
-	vector4 up = ToMatrix4(m_qQuaternionY * m_qQuaternionX) * vector4(0.0f, 1.0f, 0.0f, 1.0f);
-
-	vector3 f = vector3(forward.x, forward.y, forward.z);
-	vector3 u = vector3(up.x, up.y, up.z);
-
-	//vector4 lookAtMat = vector4(0.0f, 0.0f, 1.0f, 1.0f) * glm::lookAt(m_v3Pos, f, u);
-	//vector4 lookAtMat = vector4(0.0f, 0.0f, 1.0f, 1.0f) * glm::lookAt(m_v3Pos, f, u);
-	vector3 lookAtMat = m_v3Pos + f;
-
-	//vector4 lookAtMat = vector4(v3View, 1.0f) * glm::lookAt(m_v3Pos, f, u);
-
-	//reference code from online, not mine
-	//https://github.com/Formlabs/Eigen/blob/master/demos/opengl/camera.cpp
-	/*Vector3f Camera::direction(void) const
-	{
-		return -(orientation() * Vector3f::UnitZ());
-	}
-	Vector3f Camera::up(void) const
-	{
-		return orientation() * Vector3f::UnitY();
-	}
-	Vector3f Camera::right(void) const
-	{
-		return orientation() * Vector3f::UnitX();
-	}*/
-
-	//m_pCamera->SetPositionTargetAndUp();
-	m_pCamera->SetTarget(vector3(lookAtMat.x, lookAtMat.y, lookAtMat.z));
+	//set camera position
 	m_pCamera->SetPosition(m_v3Pos);
 
-	//m_pCamera->SetTarget(vector3(lookAtMat.x, lookAtMat.y, lookAtMat.z));
-	//m_pCamera->SetTarget(vector3(v3View.x + lookAtMat.x, v3View.y + lookAtMat.y, v3View.z + lookAtMat.z));
+	//get forward vector, convert from matrix4 to vec3
+	vector4 v4Forward = ToMatrix4(m_qQuaternionY * m_qQuaternionX) * vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	vector3 v3Forward = vector3(v4Forward.x, v4Forward.y, v4Forward.z);
 	
-	//m_pCamera->SetTarget(vector3(v3View.x, v3View.y, v3View.z));
+	//where the camera is looking
+	vector3 v3lookAt = m_v3Pos + v3Forward;
 
-	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
-	//m_pCamera->SetPositionTargetAndUp(m_v3Pos, vector3(0, 0, 1 - m_v3Pos.z), vector3(0, 1, 0));
+	//set target of camera to be lookAt vector
+	m_pCamera->SetTarget(vector3(v3lookAt.x, v3lookAt.y, v3lookAt.z));
 
 	//clear the render list
 	m_pMeshMngr->ClearRenderList();

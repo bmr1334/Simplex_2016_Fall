@@ -347,41 +347,60 @@ void Application::CameraRotation(float a_fSpeed)
 	float fAngleX = 0.0f;
 	float fAngleY = 0.0f;
 	float fDeltaMouse = 0.0f;
+
+	//if mouse is to left of center
 	if (MouseX < CenterX)
 	{
 		fDeltaMouse = static_cast<float>(CenterX - MouseX);
 		fAngleY += fDeltaMouse * a_fSpeed;
+
+		//limit y theta
+		if (m_currThetaY > 360.0f) m_currThetaY = 0.0f;
+		
+		//calculate y rotation based on angle
+		m_currThetaY += fAngleY;
 		m_qQuaternionY = m_qQuaternionY * glm::angleAxis(fAngleY, AXIS_Y);
 	}
+
+	//if mouse is to right of center
 	else if (MouseX > CenterX)
 	{
 		fDeltaMouse = static_cast<float>(MouseX - CenterX);
 		fAngleY -= fDeltaMouse * a_fSpeed;
+
+		//limit y theta
+		if (m_currThetaY < 0.0f) m_currThetaY = 360.0f;
+
+		//calculate y rotation based on angle
+		m_currThetaY += fAngleY;
 		m_qQuaternionY = m_qQuaternionY * glm::angleAxis(fAngleY, AXIS_Y);
 	}
+
+	//if mouse is above center
 	if (MouseY < CenterY)
 	{
 		fDeltaMouse = static_cast<float>(CenterY - MouseY);
 		fAngleX -= fDeltaMouse * a_fSpeed;
-		if (currAngleX + fAngleX < 25) {
-			currAngleX += -fAngleX;
-			m_qQuaternionX = m_qQuaternionX * glm::angleAxis(fAngleX, AXIS_X);
-		}
-	}
-	else if (MouseY > CenterY)
-	{
-		fDeltaMouse = static_cast<float>(MouseY - CenterY);
-		fAngleX += fDeltaMouse * a_fSpeed;
-		if (currAngleX - fAngleX> -25) {
-			currAngleX += -fAngleX;
+
+		//limit and calculate x theta
+		if (m_currThetaX < 75) {
+			m_currThetaX += -fAngleX;
 			m_qQuaternionX = m_qQuaternionX * glm::angleAxis(fAngleX, AXIS_X);
 		}
 	}
 
-	//cap vertical rotation
-	std::cout << "\n" << currAngleX;
-	//if (currAngleX >= 85) fAngleX -= fAngleX;
-	//if (currAngleX <= 85) fAngleX += fAngleX;
+	//if mouse is below center
+	else if (MouseY > CenterY)
+	{
+		fDeltaMouse = static_cast<float>(MouseY - CenterY);
+		fAngleX += fDeltaMouse * a_fSpeed;
+
+		//limit and calculate x theta
+		if (m_currThetaX> -75) {
+			m_currThetaX += -fAngleX;
+			m_qQuaternionX = m_qQuaternionX * glm::angleAxis(fAngleX, AXIS_X);
+		}
+	}
 
 	//Change the Yaw and the Pitch of the camera
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
@@ -401,26 +420,27 @@ void Application::ProcessKeyboard(void)
 	if (fMultiplier)
 		fSpeed *= 5.0f;
 
+	//if pressing w
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-		//m_pCameraMngr->MoveForward(fSpeed);
-		m_v3Pos.z += 0.1f;
+		//calculate movement of the player, based on the angle they're facing
+		m_cameraMovement = glm::rotate(vector3(0.0f, 0.0f, 0.1f), m_currThetaY, vector3(0.0f, 1.0f, 0.0f));
+		m_v3Pos += m_cameraMovement;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-		//m_pCameraMngr->MoveForward(-fSpeed);
-		m_v3Pos.z -= 0.1f;
+		m_cameraMovement = glm::rotate(vector3(0.0f, 0.0f, 0.1f), m_currThetaY, vector3(0.0f, 1.0f, 0.0f));
+		m_v3Pos -= m_cameraMovement;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-		//m_pCameraMngr->MoveSideways(-fSpeed);
-		m_v3Pos.x += 0.1f;
+		m_cameraMovement = glm::rotate(vector3(0.1f, 0.0f, 0.0f), m_currThetaY, vector3(0.0f, 1.0f, 0.0f));
+		m_v3Pos += m_cameraMovement;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-		//m_pCameraMngr->MoveSideways(fSpeed);
-		m_v3Pos.x -= 0.1f;
+		m_cameraMovement = glm::rotate(vector3(0.1f, 0.0f, 0.0f), m_currThetaY, vector3(0.0f, 1.0f, 0.0f));
+		m_v3Pos -= m_cameraMovement;
 	}
-
 
 #pragma endregion
 }
