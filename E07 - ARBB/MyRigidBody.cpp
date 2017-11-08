@@ -87,6 +87,21 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	//your code goes here---------------------
 	m_v3MinG = m_v3MinL;
 	m_v3MaxG = m_v3MaxL;
+
+	vector3 v3vertex[8];
+
+	//back face
+	v3vertex[0] = m_v3MinL;
+	v3vertex[1] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z);
+	v3vertex[2] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z);
+	v3vertex[3] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z);
+
+	//front face
+	v3vertex[4] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z);
+	v3vertex[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z);
+	v3vertex[6] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z);
+	v3vertex[7] = m_v3MaxL;
+
 	//----------------------------------------
 
 	//we calculate the distance between min and max vectors
