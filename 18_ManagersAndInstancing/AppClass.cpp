@@ -22,8 +22,15 @@ void Application::InitVariables(void)
 	//Get the singleton
 	m_pMyMeshMngr = MyMeshManager::GetInstance();
 	m_pMyMeshMngr->SetCamera(m_pCamera);
-	
-	
+	m_pMesh = new MyMesh();
+	m_pMesh->GenerateTube(1.0f, 0.7f, 2.0f, 10, C_GREEN_LIME);
+
+	for (uint i = 0; i < 5000; ++i) {
+		matrix4* m4Temp = new matrix4();
+		*m4Temp = glm::translate(IDENTITY_M4, vector3(i * 2.0f, 0.0f, 0.0f)) * ToMatrix4(m_qArcBall);
+		m4List.push_back(m4Temp);
+	}
+	m_RB = new MyRigidBody();
 }
 void Application::Update(void)
 {
@@ -34,24 +41,17 @@ void Application::Update(void)
 	ArcBall();
 
 	//Is the first person camera active?
-	CameraRotation();
-
-	//Add objects to the Manager
-	uint nCount = 0;
-	for (int j = -420; j < 420; j += 2)
-	{
-		for (int i = -420; i < 420; i += 2)
-		{
-			m_pMyMeshMngr->AddConeToRenderList(glm::translate(vector3(i, 0.0f, j)));
-			nCount++;
-		}
-	}
-	m_pMeshMngr->Print("Objects: " + std::to_string(nCount) + "\n", C_BLUE);
+	CameraRotation();	
 }
 void Application::Display(void)
 {
 	//Clear the screen
 	ClearScreen();
+
+
+	*m4List[0] = glm::translate(IDENTITY_M4, vector3(0*3.0f, 0.0f, 0.0f)) * ToMatrix4(m_qArcBall);
+
+	m_pMesh->Render(m_pCamera, m4List);
 
 	//Render the list of MyMeshManager
 	m_pMyMeshMngr->Render();
@@ -76,7 +76,14 @@ void Application::Release(void)
 	//release the singleton
 	MyMeshManager::ReleaseInstance();
 
+	for (uint i = 0; i < m4List.size(); ++i) {
+		SafeDelete(m4List[i]);
+	}
+
+	m4List.clear();
+
 	//release the camera
+	SafeDelete(m_pMesh);
 	SafeDelete(m_pCamera);
 
 	//release GUI
