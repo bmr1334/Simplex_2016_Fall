@@ -82,12 +82,10 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	if (a_m4ModelMatrix == m_m4ToWorld)
 		return;
 
+	//assign model matrix
 	m_m4ToWorld = a_m4ModelMatrix;
 	
 	//your code goes here---------------------
-	m_v3MinG = m_v3MinL;
-	m_v3MaxG = m_v3MaxL;
-
 	vector3 v3vertex[8];
 
 	//back face
@@ -101,6 +99,26 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	v3vertex[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z);
 	v3vertex[6] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z);
 	v3vertex[7] = m_v3MaxL;
+
+	//place vertices in world space
+	for (uint i = 0; i < 8; ++i) {
+		v3vertex[i] = vector3(m_m4ToWorld * vector4(v3vertex[i], 1.0f));
+	}
+
+	//set max and min as first vertex
+	m_v3MaxG = m_v3MinG = v3vertex[0];
+
+	//get max and min for global box
+	for (uint ui = 0; ui < 8; ++ui) {
+		if (m_v3MaxG.x < v3vertex[ui].x) m_v3MaxG.x = v3vertex[ui].x;
+		else if (m_v3MinG.x > v3vertex[ui].x) m_v3MinG.x = v3vertex[ui].x;
+
+		if (m_v3MaxG.y < v3vertex[ui].y) m_v3MaxG.y = v3vertex[ui].y;
+		else if (m_v3MinG.y > v3vertex[ui].y) m_v3MinG.y = v3vertex[ui].y;
+
+		if (m_v3MaxG.z < v3vertex[ui].z) m_v3MaxG.z = v3vertex[ui].z;
+		else if (m_v3MinG.z > v3vertex[ui].z) m_v3MinG.z = v3vertex[ui].z;
+	}
 
 	//----------------------------------------
 
