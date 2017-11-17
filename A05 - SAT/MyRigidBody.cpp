@@ -286,7 +286,113 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+	
+	
 
-	//there is no axis test that separates this two objects
+	//check if there's a separating plane
+	//if (SAT_AX) {
+
+	//	//return 1 if a separating plane CAN be found
+	//	return 1;
+	//}
+
+	float ra, rb;
+	matrix3 R; //rotation matrix
+	matrix3 AbsR;
+	vector4 centerGlobal = vector4(m_v3Center, 1.0f) * m_m4ToWorld;
+
+
+	vector4 vec[3];
+	//vec[0] = vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	//vec[1] = vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	//vec[2] = vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	vec[0] = vector4(m_m4ToWorld[0][0], m_m4ToWorld[0][1], m_m4ToWorld[0][2], 1.0f);
+	vec[1] = vector4(m_m4ToWorld[1][0], m_m4ToWorld[1][1], m_m4ToWorld[1][2], 1.0f);
+	vec[2] = vector4(m_m4ToWorld[2][0], m_m4ToWorld[2][1], m_m4ToWorld[2][2], 1.0f);
+
+	// Compute rotation matrix expressing b in a's coordinate frame
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			R[i][j] = glm::dot(vec[i] * m_m4ToWorld, vec[j] * a_pOther->m_m4ToWorld);
+
+	// Compute translation vector t
+	vector4 t = (vector4(a_pOther->m_v3Center, 1.0f) * a_pOther->m_m4ToWorld) - (vector4(m_v3Center, 1.0f) * m_m4ToWorld);
+	// Bring translation into a's coordinate frame
+	t = vector4(glm::dot(t, vec[0]), glm::dot(t, vec[2]), glm::dot(t, vec[2]), 1.0f); //if this doesn't work try changing the [1] to [2]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	// Compute common subexpressions. Add in an epsilon term to
+	// counteract arithmetic errors when two edges are parallel and
+	// their cross product is (near) null (see text for details)
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			AbsR[i][j] = glm::abs(R[i][j]) + 0.000001f;
+
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++) {
+		if (i == 0)ra = m_v3HalfWidth.x;
+		if (i == 1)ra = m_v3HalfWidth.y;
+		if (i == 2)ra = m_v3HalfWidth.z;
+		rb = a_pOther->m_v3HalfWidth.x * AbsR[i][0] + a_pOther->m_v3HalfWidth.y * AbsR[i][1] + a_pOther->m_v3HalfWidth.z * AbsR[i][2];
+		if (glm::abs(t[i]) > ra + rb) return 1;
+	}
+
+	// Test axes L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++) {
+		ra = m_v3HalfWidth.x * AbsR[0][i] + m_v3HalfWidth.y * AbsR[1][i] + m_v3HalfWidth.z * AbsR[2][i];
+		if(i == 0)rb = a_pOther->m_v3HalfWidth.x;
+		if (i == 1)rb = a_pOther->m_v3HalfWidth.y;
+		if (i == 2)rb = a_pOther->m_v3HalfWidth.z;
+		
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb) return 1;
+	}
+
+	// Test axis L = A0 x B0
+	ra = m_v3HalfWidth.y * AbsR[2][0] + m_v3HalfWidth.z * AbsR[1][0];
+	rb = a_pOther->m_v3HalfWidth.y * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][1];
+	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return 1;
+
+	// Test axis L = A0 x B1
+	ra = m_v3HalfWidth.y * AbsR[2][1] + m_v3HalfWidth.z * AbsR[1][1];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][0];
+	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return 1;
+
+	// Test axis L = A0 x B2
+	ra = m_v3HalfWidth.y * AbsR[2][2] + m_v3HalfWidth.z * AbsR[1][2];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[0][1] + a_pOther->m_v3HalfWidth.y * AbsR[0][0];
+	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return 1;
+
+	// Test axis L = A1 x B0
+	ra = m_v3HalfWidth.x * AbsR[2][0] + m_v3HalfWidth.z * AbsR[0][0];
+	rb = a_pOther->m_v3HalfWidth.y * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][1];
+
+	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return 1;
+
+	// Test axis L = A1 x B1
+	ra = m_v3HalfWidth.x * AbsR[2][1] + m_v3HalfWidth.z * AbsR[0][1];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][0];
+	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return 1;
+
+	// Test axis L = A1 x B2
+	ra = m_v3HalfWidth.x * AbsR[2][2] + m_v3HalfWidth.z * AbsR[0][2];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[1][1] + a_pOther->m_v3HalfWidth.y * AbsR[1][0];
+	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return 1;
+
+	// Test axis L = A2 x B0
+	ra = m_v3HalfWidth.x * AbsR[1][0] + m_v3HalfWidth.y * AbsR[0][0];
+	rb = a_pOther->m_v3HalfWidth.y * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][1];
+	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return 1;
+
+	// Test axis L = A2 x B1
+	ra = m_v3HalfWidth.x * AbsR[1][1] + m_v3HalfWidth.y * AbsR[0][1];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][0];
+	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return 1;
+
+	// Test axis L = A2 x B2
+	ra = m_v3HalfWidth.x * AbsR[1][2] + m_v3HalfWidth.y * AbsR[0][2];
+	rb = a_pOther->m_v3HalfWidth.x * AbsR[2][1] + a_pOther->m_v3HalfWidth.y * AbsR[2][0];
+	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return 1;
+	
+
+	//there is NO separating plane, return 0
 	return eSATResults::SAT_NONE;
 }
