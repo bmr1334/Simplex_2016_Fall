@@ -295,7 +295,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//	//return 1 if a separating plane CAN be found
 	//	return 1;
 	//}
-
+	
 	float ra, rb;
 	matrix3 R; //rotation matrix
 	matrix3 AbsR;
@@ -311,6 +311,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	vec[2] = vector4(m_m4ToWorld[2][0], m_m4ToWorld[2][1], m_m4ToWorld[2][2], 1.0f);
 
 	// Compute rotation matrix expressing b in a's coordinate frame
+	//project both objects
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
 			R[i][j] = glm::dot(vec[i] * m_m4ToWorld, vec[j] * a_pOther->m_m4ToWorld);
@@ -318,7 +319,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Compute translation vector t
 	vector4 t = (vector4(a_pOther->m_v3Center, 1.0f) * a_pOther->m_m4ToWorld) - (vector4(m_v3Center, 1.0f) * m_m4ToWorld);
 	// Bring translation into a's coordinate frame
-	t = vector4(glm::dot(t, vec[0]), glm::dot(t, vec[2]), glm::dot(t, vec[2]), 1.0f); //if this doesn't work try changing the [1] to [2]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	t = vector4(glm::dot(t, vec[0]), glm::dot(t, vec[2]), glm::dot(t, vec[2]), 1.0f); //if this doesn't work try changing the [1] to [2]
 
 	// Compute common subexpressions. Add in an epsilon term to
 	// counteract arithmetic errors when two edges are parallel and
