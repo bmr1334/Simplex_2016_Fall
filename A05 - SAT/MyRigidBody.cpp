@@ -280,29 +280,26 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	float creeperHalfwidth, steveHalfwidth;
 	matrix3 rotMat; //rotation matrix
 	matrix3 absRotMat; //rotation matrix absolute value
-	vector4 centerGlobal = vector4(m_v3Center, 1.0f) * m_m4ToWorld;
 	vector4 unitVec[3]; //unit vector4
 
-	unitVec[0] = vector4(1.0f, 0.0f, 0.0f, 1.0f);
-	unitVec[1] = vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	unitVec[2] = vector4(0.0f, 0.0f, 1.0f, 1.0f);
-	//vec[0] = vector4(m_m4ToWorld[0][0], m_m4ToWorld[0][1], m_m4ToWorld[0][2], 0.0f);
-	//vec[1] = vector4(m_m4ToWorld[1][0], m_m4ToWorld[1][1], m_m4ToWorld[1][2], 0.0f);
-	//vec[2] = vector4(m_m4ToWorld[2][0], m_m4ToWorld[2][1], m_m4ToWorld[2][2], 0.0f);
+	//calculate unit vectors
+	unitVec[0] = vector4(1.0f, 0.0f, 0.0f, 0.0f);
+	unitVec[1] = vector4(0.0f, 1.0f, 0.0f, 0.0f);
+	unitVec[2] = vector4(0.0f, 0.0f, 1.0f, 0.0f);
 
 	//calculate rotation matrix to express both models in same coordinate frame
 	//project both objects
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			rotMat[i][j] = glm::dot(unitVec[i] * m_m4ToWorld, unitVec[j] * a_pOther->m_m4ToWorld);
+			rotMat[i][j] = glm::dot(m_m4ToWorld * unitVec[i], a_pOther->m_m4ToWorld * unitVec[j]);
 		}
 	}
 
 	//calculate translation vector
-	vector4 v4trans = (vector4(a_pOther->m_v3Center, 1.0f) * a_pOther->m_m4ToWorld) - (vector4(m_v3Center, 1.0f) * m_m4ToWorld);
+	vector4 v4trans = (a_pOther->m_m4ToWorld * vector4(a_pOther->m_v3Center, 1.0f)) - (m_m4ToWorld *(vector4(m_v3Center, 1.0f)));
 
 	//bring translation to creeper's coordinate frame
-	v4trans = vector4(glm::dot(v4trans, unitVec[0] * m_m4ToWorld), glm::dot(v4trans, unitVec[1] * m_m4ToWorld), glm::dot(v4trans, unitVec[2] * m_m4ToWorld), 1.0f);
+	v4trans = vector4(glm::dot(v4trans, m_m4ToWorld * unitVec[0]), glm::dot(v4trans, m_m4ToWorld * unitVec[1]), glm::dot(v4trans, m_m4ToWorld * unitVec[2]), 1.0f);
 
 	//get abosulte value of rotation matrix
 	//add small value to account for parallel edges
