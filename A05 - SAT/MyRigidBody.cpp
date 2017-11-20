@@ -276,123 +276,140 @@ void MyRigidBody::AddToRenderList(void)
 
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
-	/*
-	Your code goes here instead of this comment;
-
-	For this method, if there is an axis that separates the two objects
-	then the return will be different than 0; 1 for any separating axis
-	is ok if you are not going for the extra credit, if you could not
-	find a separating axis you need to return 0, there is an enum in
-	Simplex that might help you [eSATResults] feel free to use it.
-	(eSATResults::SAT_NONE has a value of 0)
-	*/
-	
-	
-
-	//check if there's a separating plane
-	//if (SAT_AX) {
-
-	//	//return 1 if a separating plane CAN be found
-	//	return 1;
-	//}
-	
-	float ra, rb;
-	matrix3 R; //rotation matrix
-	matrix3 AbsR;
+	//variables
+	float creeperHalfwidth, steveHalfwidth;
+	matrix3 rotMat; //rotation matrix
+	matrix3 absRotMat; //rotation matrix absolute value
 	vector4 centerGlobal = vector4(m_v3Center, 1.0f) * m_m4ToWorld;
+	vector4 unitVec[3]; //unit vector4
 
-
-	vector4 vec[3];
-	vec[0] = vector4(1.0f, 0.0f, 0.0f, 1.0f);
-	vec[1] = vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	vec[2] = vector4(0.0f, 0.0f, 1.0f, 1.0f);
+	unitVec[0] = vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	unitVec[1] = vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	unitVec[2] = vector4(0.0f, 0.0f, 1.0f, 1.0f);
 	//vec[0] = vector4(m_m4ToWorld[0][0], m_m4ToWorld[0][1], m_m4ToWorld[0][2], 0.0f);
 	//vec[1] = vector4(m_m4ToWorld[1][0], m_m4ToWorld[1][1], m_m4ToWorld[1][2], 0.0f);
 	//vec[2] = vector4(m_m4ToWorld[2][0], m_m4ToWorld[2][1], m_m4ToWorld[2][2], 0.0f);
 
-	// Compute rotation matrix expressing b in a's coordinate frame
+	//calculate rotation matrix to express both models in same coordinate frame
 	//project both objects
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			R[i][j] = glm::dot(vec[i] * m_m4ToWorld, vec[j] * a_pOther->m_m4ToWorld);
-
-	// Compute translation vector t
-	vector4 t = (vector4(a_pOther->m_v3Center, 1.0f) * a_pOther->m_m4ToWorld) - (vector4(m_v3Center, 1.0f) * m_m4ToWorld);
-	// Bring translation into a's coordinate frame
-	t = vector4(glm::dot(t, vec[0] * m_m4ToWorld), glm::dot(t, vec[1] * m_m4ToWorld), glm::dot(t, vec[2] * m_m4ToWorld), 1.0f); //if this doesn't work try changing the [1] to [2]
-
-	// Compute common subexpressions. Add in an epsilon term to
-	// counteract arithmetic errors when two edges are parallel and
-	// their cross product is (near) null (see text for details)
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			AbsR[i][j] = glm::abs(R[i][j]) + 0.000001f;
-
-	// Test axes L = A0, L = A1, L = A2
 	for (int i = 0; i < 3; i++) {
-		if (i == 0)ra = m_v3HalfWidth.x;
-		if (i == 1)ra = m_v3HalfWidth.y;
-		if (i == 2)ra = m_v3HalfWidth.z;
-		rb = a_pOther->m_v3HalfWidth.x * AbsR[i][0] + a_pOther->m_v3HalfWidth.y * AbsR[i][1] + a_pOther->m_v3HalfWidth.z * AbsR[i][2];
-		if (glm::abs(t[i]) > (ra + rb)) 
-			return 1;
+		for (int j = 0; j < 3; j++) {
+			rotMat[i][j] = glm::dot(unitVec[i] * m_m4ToWorld, unitVec[j] * a_pOther->m_m4ToWorld);
+		}
 	}
 
-	// Test axes L = B0, L = B1, L = B2
+	//calculate translation vector
+	vector4 v4trans = (vector4(a_pOther->m_v3Center, 1.0f) * a_pOther->m_m4ToWorld) - (vector4(m_v3Center, 1.0f) * m_m4ToWorld);
+
+	//bring translation to creeper's coordinate frame
+	v4trans = vector4(glm::dot(v4trans, unitVec[0] * m_m4ToWorld), glm::dot(v4trans, unitVec[1] * m_m4ToWorld), glm::dot(v4trans, unitVec[2] * m_m4ToWorld), 1.0f);
+
+	//get abosulte value of rotation matrix
+	//add small value to account for parallel edges
 	for (int i = 0; i < 3; i++) {
-		ra = m_v3HalfWidth.x * AbsR[0][i] + m_v3HalfWidth.y * AbsR[1][i] + m_v3HalfWidth.z * AbsR[2][i];
-		if(i == 0)rb = a_pOther->m_v3HalfWidth.x;
-		if (i == 1)rb = a_pOther->m_v3HalfWidth.y;
-		if (i == 2)rb = a_pOther->m_v3HalfWidth.z;
-		auto temp = glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]);
-		if (temp > (ra + rb)) 
+		for (int j = 0; j < 3; j++) {
+			absRotMat[i][j] = glm::abs(rotMat[i][j]) + 0.000001f;
+		}
+	}
+	
+	//check if there's a separating plane
+	//return 1 if a separating plane CAN be found
+	//return 0 if a separating plane CANNOT be found
+	//L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++) {
+		//determine which halfwidth to use
+		if (i == 0) creeperHalfwidth = m_v3HalfWidth.x;
+		if (i == 1) creeperHalfwidth = m_v3HalfWidth.y;
+		if (i == 2) creeperHalfwidth = m_v3HalfWidth.z;
+
+		//calculate other halfwidth
+		steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[i][0] + a_pOther->m_v3HalfWidth.y * absRotMat[i][1] + a_pOther->m_v3HalfWidth.z * absRotMat[i][2];
+
+		//are they too close?
+		if (glm::abs(v4trans[i]) > (creeperHalfwidth + steveHalfwidth)) {
 			return 1;
+		}
 	}
 
-	// Test axis L = A0 x B0
-	ra = m_v3HalfWidth.y * AbsR[2][0] + m_v3HalfWidth.z * AbsR[1][0];
-	rb = a_pOther->m_v3HalfWidth.y * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][1];
-	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > (ra + rb)) return 1;
+	//L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++) {
+		//determine which halfwidth to use
+		if (i == 0) steveHalfwidth = a_pOther->m_v3HalfWidth.x;
+		if (i == 1) steveHalfwidth = a_pOther->m_v3HalfWidth.y;
+		if (i == 2) steveHalfwidth = a_pOther->m_v3HalfWidth.z;
 
-	// Test axis L = A0 x B1
-	ra = m_v3HalfWidth.y * AbsR[2][1] + m_v3HalfWidth.z * AbsR[1][1];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][0];
-	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > (ra + rb)) return 1;
+		//calculate other halfwidth
+		creeperHalfwidth = m_v3HalfWidth.x * absRotMat[0][i] + m_v3HalfWidth.y * absRotMat[1][i] + m_v3HalfWidth.z * absRotMat[2][i];
+		
+		//are they too close?
+		//auto temp = glm::abs(v4trans[0] * rotMat[0][i] + v4trans[1] * rotMat[1][i] + v4trans[2] * rotMat[2][i]);
+		if (glm::abs(v4trans[i]) > (creeperHalfwidth + steveHalfwidth)) {
+			return 1;
+		}
+	}
 
-	// Test axis L = A0 x B2
-	ra = m_v3HalfWidth.y * AbsR[2][2] + m_v3HalfWidth.z * AbsR[1][2];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[0][1] + a_pOther->m_v3HalfWidth.y * AbsR[0][0];
-	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > (ra + rb)) return 1;
+	//axis L = A0 x B0
+	creeperHalfwidth = m_v3HalfWidth.y * absRotMat[2][0] + m_v3HalfWidth.z * absRotMat[1][0];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.y * absRotMat[0][2] + a_pOther->m_v3HalfWidth.z * absRotMat[0][1];
+	if (glm::abs(v4trans[2] * rotMat[1][0] - v4trans[1] * rotMat[2][0]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A1 x B0
-	ra = m_v3HalfWidth.x * AbsR[2][0] + m_v3HalfWidth.z * AbsR[0][0];
-	rb = a_pOther->m_v3HalfWidth.y * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][1];
-	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > (ra + rb)) return 1;
+	//axis L = A0 x B1
+	creeperHalfwidth = m_v3HalfWidth.y * absRotMat[2][1] + m_v3HalfWidth.z * absRotMat[1][1];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[0][2] + a_pOther->m_v3HalfWidth.z * absRotMat[0][0];
+	if (glm::abs(v4trans[2] * rotMat[1][1] - v4trans[1] * rotMat[2][1]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A1 x B1
-	ra = m_v3HalfWidth.x * AbsR[2][1] + m_v3HalfWidth.z * AbsR[0][1];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][0];
-	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > (ra + rb)) return 1;
+	//axis L = A0 x B2
+	creeperHalfwidth = m_v3HalfWidth.y * absRotMat[2][2] + m_v3HalfWidth.z * absRotMat[1][2];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[0][1] + a_pOther->m_v3HalfWidth.y * absRotMat[0][0];
+	if (glm::abs(v4trans[2] * rotMat[1][2] - v4trans[1] * rotMat[2][2]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A1 x B2
-	ra = m_v3HalfWidth.x * AbsR[2][2] + m_v3HalfWidth.z * AbsR[0][2];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[1][1] + a_pOther->m_v3HalfWidth.y * AbsR[1][0];
-	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > (ra + rb)) return 1;
+	//axis L = A1 x B0
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[2][0] + m_v3HalfWidth.z * absRotMat[0][0];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.y * absRotMat[1][2] + a_pOther->m_v3HalfWidth.z * absRotMat[1][1];
+	if (glm::abs(v4trans[0] * rotMat[2][0] - v4trans[2] * rotMat[0][0]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A2 x B0
-	ra = m_v3HalfWidth.x * AbsR[1][0] + m_v3HalfWidth.y * AbsR[0][0];
-	rb = a_pOther->m_v3HalfWidth.y * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][1];
-	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > (ra + rb)) return 1;
+	//axis L = A1 x B1
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[2][1] + m_v3HalfWidth.z * absRotMat[0][1];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[1][2] + a_pOther->m_v3HalfWidth.z * absRotMat[1][0];
+	if (glm::abs(v4trans[0] * rotMat[2][1] - v4trans[2] * rotMat[0][1]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A2 x B1
-	ra = m_v3HalfWidth.x * AbsR[1][1] + m_v3HalfWidth.y * AbsR[0][1];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][0];
-	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > (ra + rb)) return 1;
+	//axis L = A1 x B2
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[2][2] + m_v3HalfWidth.z * absRotMat[0][2];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[1][1] + a_pOther->m_v3HalfWidth.y * absRotMat[1][0];
+	if (glm::abs(v4trans[0] * rotMat[2][2] - v4trans[2] * rotMat[0][2]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
-	// Test axis L = A2 x B2
-	ra = m_v3HalfWidth.x * AbsR[1][2] + m_v3HalfWidth.y * AbsR[0][2];
-	rb = a_pOther->m_v3HalfWidth.x * AbsR[2][1] + a_pOther->m_v3HalfWidth.y * AbsR[2][0];
-	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > (ra + rb)) return 1;
+	//axis L = A2 x B0
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[1][0] + m_v3HalfWidth.y * absRotMat[0][0];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.y * absRotMat[2][2] + a_pOther->m_v3HalfWidth.z * absRotMat[2][1];
+	if (glm::abs(v4trans[1] * rotMat[0][0] - v4trans[0] * rotMat[1][0]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
+
+	//axis L = A2 x B1
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[1][1] + m_v3HalfWidth.y * absRotMat[0][1];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[2][2] + a_pOther->m_v3HalfWidth.z * absRotMat[2][0];
+	if (glm::abs(v4trans[1] * rotMat[0][1] - v4trans[0] * rotMat[1][1]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
+
+	//axis L = A2 x B2
+	creeperHalfwidth = m_v3HalfWidth.x * absRotMat[1][2] + m_v3HalfWidth.y * absRotMat[0][2];
+	steveHalfwidth = a_pOther->m_v3HalfWidth.x * absRotMat[2][1] + a_pOther->m_v3HalfWidth.y * absRotMat[2][0];
+	if (glm::abs(v4trans[1] * rotMat[0][2] - v4trans[0] * rotMat[1][2]) > (creeperHalfwidth + steveHalfwidth)) {
+		return 1;
+	}
 
 	//there is NO separating plane, return 0
 	return eSATResults::SAT_NONE;
