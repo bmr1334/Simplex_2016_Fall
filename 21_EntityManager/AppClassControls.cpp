@@ -1,4 +1,5 @@
 #include "AppClass.h"
+#include "AStar.h"
 using namespace Simplex;
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
@@ -477,6 +478,14 @@ void Application::ProcessKeyboard(void)
 	{
 		m_qCreeper = quaternion();
 	}
+
+	//pressing enter to start search
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+		//run the A* search
+		AStar a;
+		a.RunSearch();
+	}
+		
 }
 //Joystick
 void Application::ProcessJoystick(void)

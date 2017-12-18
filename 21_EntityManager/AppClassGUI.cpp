@@ -1,4 +1,5 @@
 #include "AppClass.h"
+#include "AStar.h"
 using namespace Simplex;
 ImGuiObject Application::gui;
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
@@ -119,7 +120,7 @@ void Application::DrawGUI(void)
 {
 #pragma region Debugging Information
 	//Print info on the screen
-	uint nEmptyLines = 20;
+	uint nEmptyLines = 15;
 	for (uint i = 0; i < nEmptyLines; ++i)
 		m_pMeshMngr->PrintLine("");//Add a line on top
 	//m_pMeshMngr->Print("						");
@@ -152,20 +153,13 @@ void Application::DrawGUI(void)
 			ImGui::TextColored(v4Color, m_sProgrammer.c_str());
 			ImGui::Text("FrameRate: %.2f [FPS] -> %.3f [ms/frame]\n",
 				ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-			ImGui::Text("Control:\n");
-			ImGui::Text("   WASD: Movement\n");
-			ImGui::Text("	 F1: Perspective\n");
-			ImGui::Text("	 F2: Orthographic X\n");
-			ImGui::Text("	 F3: Orthographic Y\n");
-			ImGui::Text("	 F4: Orthographic Z\n");
+			ImGui::Text("WASD for Movement\n");
 			ImGui::Separator();
-			ImGui::Text("  Left: Move Creeper\n");
-			ImGui::Text(" Right: Move Creeper\n");
-			ImGui::Text("    Up: Move Creeper\n");
-			ImGui::Text("  Down: Move Creeper\n");
-			ImGui::Text(" Shift: Modify Up/Down\n");
+			ImGui::TextColored(ImColor(255, 255, 0), "A* Search Algorithm\n");
+			ImGui::Text("Left dirt is start, right dirt is goal\n");
+			ImGui::Text("Raised grass is impassible wall\n");
+			ImGui::Text("Press 'enter' to start search\n");
 			ImGui::Separator();
-			ImGui::TextColored(ImColor(255, 255, 0), "Entity Manager\n");
 		}
 		ImGui::End();
 	}

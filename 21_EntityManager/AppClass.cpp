@@ -2,12 +2,6 @@
 using namespace Simplex;
 void Application::InitVariables(void)
 {
-	////Change this to your name and email
-	//m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
-
-	////Alberto needed this at this position for software recording.
-	//m_pWindow->setPosition(sf::Vector2i(710, 0));
-
 	//Set the position and target of the camera
 	m_pCameraMngr->SetPositionTargetAndUp(
 		vector3(0.0f, 0.0f, 13.0f), //Position
@@ -19,31 +13,119 @@ void Application::InitVariables(void)
 	//Entity Manager
 	m_pEntityMngr = MyEntityManager::GetInstance();
 	
-	//creeper
-	m_pEntityMngr->AddEntity("Minecraft\\Creeper.obj", "Creeper");
-	m_pEntityMngr->SetAxisVisibility(true, "Creeper"); //set visibility of the entity's axis
+	////creeper
+	//m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Creeper");
+	//m_pEntityMngr->SetAxisVisibility(true, "Creeper"); //set visibility of the entity's axis
 
-	//steve
-	m_pEntityMngr->AddEntity("Minecraft\\Steve.obj", "Steve");
-	m_pEntityMngr->SetAxisVisibility(true, "Steve"); //set visibility of the entity's axis
+	////steve
+	//m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Steve");
+	//m_pEntityMngr->SetAxisVisibility(true, "Steve"); //set visibility of the entity's axis
 
-	//add an entity
-	m_pEntityMngr->AddEntity("Minecraft\\Cow.obj", "Cow");
-	//set the model matrix and visibility of the last entity added
-	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(2.0f,-1.5f,-1.0f)));
+	//add grid entities
+	//at y = 2
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "End"); //end goal
+	//m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, 2.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true, "End");
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-1.0f, 2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
 	m_pEntityMngr->SetAxisVisibility(true);
 
-	//add an entity
-	m_pEntityMngr->AddEntity("Minecraft\\Zombie.obj", "Zombie");
-	//set the model matrix and visibility of the last entity added
-	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, -2.5f, 0.0f)));
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, 2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
 	m_pEntityMngr->SetAxisVisibility(true);
 
-	//add an entity
-	m_pEntityMngr->AddEntity("Minecraft\\Pig.obj", "Pig");
-	//set the model matrix and visibility of the last entity added
-	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f,-1.0f,-1.0f)));
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-3.0f, 2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
 	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-4.0f, 2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	//at y = 1
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, 1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-1.0f, 1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, 1.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-3.0f, 1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-4.0f, 1.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	//at y = 0
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, 0.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-1.0f, 0.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, 0.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-3.0f, 0.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-4.0f, 0.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	//at y = -1
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, -1.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-1.0f, -1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, -1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-3.0f, -1.0f, 0.5f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f))); //wall
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-4.0f, -1.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	//at y = -2
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(0.0f, -2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-1.0f, -2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, -2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Cube");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-3.0f, -2.0f, 0.0f)) * glm::rotate(90.0f, vector3(1.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true);
+
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj", "Start"); //start position!
+	//m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-4.0f, -2.0f, 0.0f)));
+	m_pEntityMngr->SetAxisVisibility(true, "Start");
 }
 void Application::Update(void)
 {
@@ -55,6 +137,15 @@ void Application::Update(void)
 
 	//Is the first person camera active?
 	CameraRotation();
+
+	//starting position cube
+	matrix4 mStart = glm::translate(vector3(-4.0f, -3.0f, 1.0f)) * glm::rotate(-90.0f, vector3(1.0f, 0.0f, 0.0f));
+	m_pEntityMngr->SetModelMatrix(mStart, "Start");
+
+	//ending position cube
+	matrix4 mEnd = glm::translate(vector3(0.0f, 1.0f, 1.0f)) * glm::rotate(-90.0f, vector3(1.0f, 0.0f, 0.0f));
+	m_pEntityMngr->SetModelMatrix(mEnd, "End");
+
 	
 	//Set model matrix to the creeper
 	matrix4 mCreeper = glm::translate(m_v3Creeper) * ToMatrix4(m_qCreeper) * ToMatrix4(m_qArcBall);
@@ -62,14 +153,13 @@ void Application::Update(void)
 	
 
 	//Set model matrix to Steve
-	matrix4 mSteve = glm::translate(vector3(2.5f, 0.0f, 0.0f)) * glm::rotate(IDENTITY_M4, -55.0f, AXIS_Z);
+	matrix4 mSteve = glm::translate(vector3(2.5f, 0.0f, 0.0f));
 	m_pEntityMngr->SetModelMatrix(mSteve, "Steve");
 
-
 	//Move the last entity added slowly to the right
-	matrix4 lastMatrix = m_pEntityMngr->GetModelMatrix();// get the model matrix of the last added
-	lastMatrix *= glm::translate(IDENTITY_M4, vector3(0.01f, 0.0f, 0.0f)); //translate it
-	m_pEntityMngr->SetModelMatrix(lastMatrix); //return it to its owner
+	//matrix4 lastMatrix = m_pEntityMngr->GetModelMatrix();// get the model matrix of the last added
+	//lastMatrix *= glm::translate(IDENTITY_M4, vector3(0.01f, 0.0f, 0.0f)); //translate it
+	//m_pEntityMngr->SetModelMatrix(lastMatrix); //return it to its owner
 
 	//Update Entity Manager
 	m_pEntityMngr->Update();
